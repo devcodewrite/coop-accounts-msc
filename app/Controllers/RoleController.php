@@ -8,7 +8,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use Codewrite\CoopAuth\ApiResponse;
 
-class Roles extends ResourceController
+class RoleController extends ResourceController
 {
    /**
      * Return an array of resource objects, themselves in array format.

@@ -5,7 +5,7 @@ namespace App\Controllers;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 
-class Resources extends ResourceController
+class GroupRoleController extends ResourceController
 {
     /**
      * Return an array of resource objects, themselves in array format.

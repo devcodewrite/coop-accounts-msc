@@ -12,7 +12,8 @@ class UserEntity extends Entity
         'email'    => null,
         'phone'    => null,
         'username' => null,
-        'name'     => null
+        'name'     => null,
+        'social_id' => null,
     ];
 
     protected $datamap = [
@@ -20,11 +21,10 @@ class UserEntity extends Entity
     ];
 
     // Specify which attributes should be hidden in the output (e.g., JSON)
-    protected $hidden = ['password'];
+    protected $hidden = ['password','social_id'];
 
     // Specify casts for specific fields
     protected $casts = [
-        'id' => 'uuid',
         'email_verified' => 'bool',
         'phone_verified' => 'bool'
     ];
@@ -68,5 +68,13 @@ class UserEntity extends Entity
     {
         // Generate a random 12-digit ID
         return str_pad((string) mt_rand(0, 999999999999), 12, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Verify user password
+     */
+    public function verifyPassword($password): bool |null
+    {
+        return password_verify($password, $this->password);
     }
 }

@@ -9,7 +9,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use Codewrite\CoopAuth\ApiResponse;
 
-class Users extends ResourceController
+class UserController extends ResourceController
 {
     /**
      * Return an array of resource objects, themselves in array format.

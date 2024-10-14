@@ -7,7 +7,7 @@ use App\Models\UserModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 
-class Registration extends ResourceController
+class RegistrationController extends ResourceController
 {
     /**
      * Create a new user with email or phone, username, name, and password.

@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Entities\Cast\CastUuid;
+use App\Entities\UserEntity;
 use App\Models\OtpRequestModel;
 use App\Models\UserModel;
 use CodeIgniter\HTTP\Response;
@@ -15,8 +16,9 @@ use Config\Services;
 use Exception;
 use Firebase\JWT\ExpiredException;
 
-class Auth extends ResourceController
+class AuthController extends ResourceController
 {
+    protected $format    = 'json';
     private $emailService;
     private $smsService;
 
@@ -34,16 +36,46 @@ class Auth extends ResourceController
      */
     public function authorize()
     {
-        $username = $this->request->getVar('username');
+        $rules = [
+            'username' => 'permit_empty|alpha_numeric',
+            'email' => 'permit_empty|valid_email',
+            'phone' => 'permit_empty|numeric',
+            'password' => 'required'
+        ];
+
+        if (!$this->validate($rules)) {
+            return $this->respond([
+                'status' => false,
+                'data' => null,
+                'message' => "Invalid credentials",
+                'errors' => $this->validator->getErrors()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $identifiers = $this->validator->getValidated();
+        unset($identifiers['password']);
         $password = $this->request->getVar('password');
 
-        // Replace with your user authentication logic
-        if ($username === 'admin' && $password === 'password') {
-            $accessPayload = auth()->generatePermissions('235109900912');
+        $userModel = new UserModel();
+        $user = $userModel->where($identifiers)->first();
 
+        if (!$user)
+            return (new GuardReponse(false, GuardReponse::INVALID_CREDENTIALS))->responsed();
+
+        // if using email to login check if its verified
+        if (isset($identifiers['email']) && !$user->email_verified)
+            return (new GuardReponse(false, GuardReponse::UNVERIFIED_EMAIL))->responsed();
+
+        // if using phone to login check if its verified
+        if (isset($identifiers['phone']) && !$user->phone_verified)
+            return (new GuardReponse(false, GuardReponse::UNVERIFIED_PHONE))->responsed();
+
+        // Replace with your user authentication logic
+        if ($user->verifyPassword($password)) {
+            $accessPayload = auth()->generatePermissions($user->id);
             // Refresh Token Payload (valid for 7 days)
             $refreshPayload = [
-                'sub' => '235109900912',
+                'sub' => $user->id,
             ];
 
             $accessToken = auth()->generateAccessToken($accessPayload);
@@ -51,13 +83,17 @@ class Auth extends ResourceController
 
             return $this->respond([
                 'status' => true,
-                'data' => auth()->user(),
+                'data' => $user,
                 'access_token' => $accessToken,
                 'refresh_token' => $refreshToken
             ], Response::HTTP_OK);
         }
 
-        return $this->failUnauthorized("Invalid credentials");
+        return $this->respond([
+            'status' => false,
+            'data' => null,
+            'message' => "Invalid credentials"
+        ], Response::HTTP_OK);
     }
 
     /**
@@ -69,28 +105,24 @@ class Auth extends ResourceController
     {
         try {
             $refreshToken = $this->request->getVar('refresh_token');
-
             $claims = auth()->decodeToken($refreshToken);
+            // get new token
+            $accessPayload = auth()->generatePermissions($claims->sub ?? null);
+            $newAccessToken = auth()->generateAccessToken($accessPayload);
 
-            $accessPayload = [
-                'sub' => $claims->sub ?? null,
-                'permissions' => auth()->generatePermissions($claims->sub ?? null)
-            ];
-
-            $newAccessToken = auth()->refreshToken($refreshToken, $accessPayload);
-
-            // Refresh Token Payload (valid for 7 days)
+            // Refresh Token Payload
             $refreshPayload = [
                 'sub' => $claims->sub ?? null,
             ];
             $refreshToken = auth()->generateRefreshToken($refreshPayload);
+            $userModel = new UserModel();
 
             return $this->respond([
                 'status' => true,
-                'data' => auth()->user(),
+                'data' => $userModel->find($claims->sub),
                 'access_token' => $newAccessToken,
                 'refresh_token' => $refreshToken
-            ], Response::HTTP_OK);
+            ]);
         } catch (ExpiredException $e) {
             return new GuardReponse(false, CoopResponse::TOKEN_EXPIRED);
         } catch (Exception $e) {
