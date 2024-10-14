@@ -23,6 +23,10 @@ class CreateRolesTable extends Migration
                 'constraint' => '40',
                 'null' => true,
             ],
+            'editable' => [
+                'type' => 'BOOLEAN',
+                'default' => true,
+            ],
             'deleted_at' => [
                 'type' => 'TIMESTAMP',
                 'null' => true,
