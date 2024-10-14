@@ -178,7 +178,7 @@ class AuthController extends ResourceController
 
         // Save OTP request to the database
         $otpRequestModel->save([
-            'user_id' => CastUuid::set($user->id),
+            'user_id' => $user->id,
             'type' => $type,
             'identifier' => $identifier,
             'otp' => $otp,
@@ -188,6 +188,13 @@ class AuthController extends ResourceController
 
         // Send based on request type
         if ($type == 'password_reset') {
+            // check if user has permission to change password
+            $condition =['change_password' => $user->id];
+
+            $response = auth()->canUser($user->id, 'update', 'users', $condition);
+            if ($response->denied())
+                return $response->responsed(null, "This account's password cannot be changed.");
+
             // Send Password Reset Link or OTP
             if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
                 // Send Password Reset Email

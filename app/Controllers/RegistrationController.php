@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Entities\UserEntity;
 use App\Models\UserModel;
+use CodeIgniter\HTTP\Response;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 
@@ -26,7 +27,11 @@ class RegistrationController extends ResourceController
 
         // Validate input
         if (!$this->validate($rules)) {
-            return $this->failValidationErrors($this->validator->getErrors());
+            $this->respond([
+                'status' => false,
+                'message' => 'Validation failed',
+                'errors' => $this->validator->getErrors(),
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         // Create a new UserEntity instance and set the properties
@@ -52,7 +57,10 @@ class RegistrationController extends ResourceController
                 'data'    => $user
             ]);
         } else {
-            return $this->fail('Failed to register user');
+            $this->respond([
+                'status' => false,
+                'message' => 'Failed to register user',
+            ], Response::HTTP_EXPECTATION_FAILED);
         }
     }
 }

@@ -26,6 +26,7 @@ class CreateUsersTable extends Migration
             'social_id' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 45,
+                'null'      => true,
             ],
             'social_provider' => [
                 'type'       => 'ENUM',
@@ -112,6 +113,7 @@ class CreateUsersTable extends Migration
         ]);
 
         $this->forge->addKey('id', true);
+        $this->forge->addUniqueKey('social_id');
         $this->forge->addUniqueKey('username');
         $this->forge->addUniqueKey('email');
         $this->forge->addUniqueKey('phone');
