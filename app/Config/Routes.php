@@ -18,7 +18,7 @@ $routes->post('auth/verify-opt-token', [AuthController::class, 'verifyOtpOrToken
 $routes->post('auth/reset-password', [AuthController::class, 'resetPassword2']);
 $routes->post('auth/reset-password/(:hash)', [AuthController::class, 'resetPassword/$1']);
 $routes->resource('registration', ['only' => 'create', 'controller' => 'RegistrationController']);
-$routes->resource('users', ['execpt' => 'new,edit', 'controller' => 'UserContoller']);
+$routes->resource('users', ['execpt' => 'new,edit', 'controller' => 'UserController']);
 $routes->resource('groups', ['except' => 'new,edit', 'controller' => "GroupController"]);
 $routes->resource('permissions', ['except' => 'new,edit', 'controller' => 'PermissionController']);
 $routes->resource('roles', ['except' => 'new,edit', 'controller' => 'RoleController']);

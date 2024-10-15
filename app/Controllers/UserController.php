@@ -18,12 +18,8 @@ class UserController extends ResourceController
      */
     public function index()
     {
-        $response = auth()->can('view', 'users');
-        if ($response->denied())
-            return $response->responsed();
-
         $userModel = new UserModel();
-        auth()->applyConditionsToModel($userModel, 'users');
+        auth()->applyConditionsToModel($userModel, 'users', ['owner']);
 
         $params = $this->request->getVar(['columns', 'sort', 'page', 'pageSize']);
         $allowedColumns = [];
@@ -42,12 +38,13 @@ class UserController extends ResourceController
      */
     public function show($id = null)
     {
-        $response = auth()->can('view', 'users', ['id' => $id]);
-        if ($response->denied())
-            return $response->responsed();
-
         $userModel = new UserModel();
         $userModel->where('id', $id);
+        $user = $userModel->first();
+        
+        $response = auth()->can('view', 'users', ['owner' => $user->owner ?? '']);
+        if ($response->denied())
+            return $response->responsed();
 
         $params = $this->request->getVar(['columns']);
         $allowedColumns = []; // all columns

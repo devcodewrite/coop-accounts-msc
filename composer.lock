@@ -86,12 +86,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/devcodewrite/coop-auth.git",
-                "reference": "d71a16ceab8359eeb4beff3fb64847c30189914d"
+                "reference": "d732765b879cbb9d169cef0b8b67e7e86be4c154"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/devcodewrite/coop-auth/zipball/d71a16ceab8359eeb4beff3fb64847c30189914d",
-                "reference": "d71a16ceab8359eeb4beff3fb64847c30189914d",
+                "url": "https://api.github.com/repos/devcodewrite/coop-auth/zipball/d732765b879cbb9d169cef0b8b67e7e86be4c154",
+                "reference": "d732765b879cbb9d169cef0b8b67e7e86be4c154",
                 "shasum": ""
             },
             "require": {
@@ -130,7 +130,7 @@
                 "issues": "https://github.com/devcodewrite/coop-auth/issues",
                 "source": "https://github.com/devcodewrite/coop-auth/tree/v0.1.0"
             },
-            "time": "2024-10-14T22:41:25+00:00"
+            "time": "2024-10-15T12:07:39+00:00"
         },
         {
             "name": "firebase/php-jwt",
