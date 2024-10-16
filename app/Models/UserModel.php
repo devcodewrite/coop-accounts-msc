@@ -98,9 +98,22 @@ class UserModel extends Model
         $scope = json_encode([$userId]);
 
         $permModel->insertBatch([
-            ['resource_id' => 'users', 'role_id' => $role1, 'actions' => '["create","view","update","delete"]', 'scopes' => null, 'filtes' => $fiter],
-            ['resource_id' => 'passwords', 'role_id' => $role2, 'actions' => '["update"]', 'scopes' => $scope, 'filtes' => $fiter],
-            ['resource_id' => 'users', 'role_id' => $role3, 'actions' => '["create","view","update","delete"]', 'scopes' => $scope, 'filtes' => $fiter],
+            //user accounts role
+            ['resource_id' => 'groups', 'role_id' => $role1, 'actions' => '["create","view","update","delete"]', 'scopes' => null, 'filters' => $fiter],
+            ['resource_id' => 'roles', 'role_id' => $role1, 'actions' => '["create","view","update","delete"]', 'scopes' => null, 'filters' => $fiter],
+            ['resource_id' => 'users', 'role_id' => $role1, 'actions' => '["create","view","update","delete"]', 'scopes' => null, 'filters' => $fiter],
+            ['resource_id' => 'passwords', 'role_id' => $role1, 'actions' => '["update"]', 'scopes' => $scope, 'filters' => $fiter],
+            
+            //cooperatives role
+            ['resource_id' => 'organizations', 'role_id' => $role1, 'actions' => '["create","view","update","delete"]', 'scopes' => null, 'filters' => $fiter],
+            ['resource_id' => 'offices', 'role_id' => $role1, 'actions' => '["create","view","update","delete"]', 'scopes' => null, 'filters' => $fiter],
+            ['resource_id' => 'communities', 'role_id' => $role1, 'actions' => '["create","view","update","delete"]', 'scopes' => null, 'filters' => $fiter],
+            ['resource_id' => 'associations', 'role_id' => $role1, 'actions' => '["create","view","update","delete"]', 'scopes' => null, 'filters' => $fiter],
+            ['resource_id' => 'accounts', 'role_id' => $role1, 'actions' => '["create","view","update","delete"]', 'scopes' => null, 'filters' => $fiter],
+            ['resource_id' => 'passbooks', 'role_id' => $role1, 'actions' => '["create","view","update","delete"]', 'scopes' => null, 'filters' => $fiter],
+            //sub accounts
+            ['resource_id' => 'passwords', 'role_id' => $role2, 'actions' => '["update"]', 'scopes' => $scope, 'filters' => $fiter],
+            ['resource_id' => 'users', 'role_id' => $role3, 'actions' => '["create","view","update","delete"]', 'scopes' => $scope, 'filters' => $fiter],
         ]);
 
         $userRoles = [
