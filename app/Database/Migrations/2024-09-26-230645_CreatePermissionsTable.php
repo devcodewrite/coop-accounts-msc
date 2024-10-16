@@ -20,7 +20,11 @@ class CreatePermissionsTable extends Migration
                 'type' => 'VARCHAR',
                 'constraint' => '60',
             ],
-            'conditions' => [
+            'scopes' => [
+                'type' => 'TEXT',
+                'null' => true
+            ],
+            'filters' => [
                 'type' => 'TEXT',
                 'null' => true
             ],

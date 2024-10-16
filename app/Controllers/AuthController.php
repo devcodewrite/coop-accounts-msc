@@ -189,9 +189,7 @@ class AuthController extends ResourceController
         // Send based on request type
         if ($type == 'password_reset') {
             // check if user has permission to change password
-            $condition =['change_password' => $user->id];
-
-            $response = auth()->canUser($user->id, 'update', 'users', $condition);
+            $response = auth()->canUser($user->id, 'update', 'passwords', ['id'], [$user]);
             if ($response->denied())
                 return $response->responsed(null, "This account's password cannot be changed.");
 

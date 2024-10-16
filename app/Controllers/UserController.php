@@ -11,6 +11,25 @@ use Codewrite\CoopAuth\ApiResponse;
 
 class UserController extends ResourceController
 {
+    protected $modelName = UserModel::class;
+    protected $allowedColumns = [
+        'id',
+        'type',
+        'owner',
+        'username',
+        'name',
+        'email',
+        'phone',
+        'email_verified',
+        'phone_verified',
+        'given_name',
+        'family_name',
+        'middle_name',
+        'address',
+        'gender',
+        'picture',
+        'status'
+    ];
     /**
      * Return an array of resource objects, themselves in array format.
      *
@@ -18,15 +37,10 @@ class UserController extends ResourceController
      */
     public function index()
     {
-        $userModel = new UserModel();
-        auth()->applyConditionsToModel($userModel, 'users', ['owner']);
+        $params = $this->request->getVar(['columns', 'filters', 'sort', 'page', 'pageSize']);
+        $response = new ApiResponse($this->model, $params, $this->allowedColumns);
 
-        $params = $this->request->getVar(['columns', 'sort', 'page', 'pageSize']);
-        $allowedColumns = [];
-
-        $response = new ApiResponse($userModel, $params, $allowedColumns);
-
-        return $response->getCollectionResponse();
+        return $response->getCollectionResponse(true, ["owner"]);
     }
 
     /**
@@ -38,19 +52,9 @@ class UserController extends ResourceController
      */
     public function show($id = null)
     {
-        $userModel = new UserModel();
-        $userModel->where('id', $id);
-        $user = $userModel->first();
-        
-        $response = auth()->can('view', 'users', ['owner' => $user->owner ?? '']);
-        if ($response->denied())
-            return $response->responsed();
-
         $params = $this->request->getVar(['columns']);
-        $allowedColumns = []; // all columns
-        $response = new ApiResponse($userModel, $params, $allowedColumns);
-
-        return $response->getSingleResponse();
+        $response = new ApiResponse($this->model, $params, $this->allowedColumns);
+        return $response->getSingleResponse(true, ['owner']);
     }
 
     /**
@@ -60,17 +64,11 @@ class UserController extends ResourceController
      */
     public function create()
     {
-        $response = auth()->can('create', 'users');
-
-        if ($response->denied())
-            return $response->responsed();
-
         $rules = [
             'email'    => 'required|valid_email|is_unique[users.email]',
             'phone'    => 'permit_empty|numeric|min_length[10]|max_length[15]|is_unique[users.phone]',
             'username' => 'required|min_length[3]|max_length[20]|is_unique[users.username]',
             'name'     => 'required|min_length[3]|max_length[50]',
-            'password' => 'required|min_length[6]',
             'social_id'         => 'permit_empty|string',
             'social_provider'   => 'permit_empty|string',
             'given_name'        => 'permit_empty|string',
@@ -78,7 +76,7 @@ class UserController extends ResourceController
             'middle_name'       => 'permit_empty|string',
             'address'           => 'permit_empty|string',
             'gender'            => 'permit_empty|in_list[male,female,other]',
-            'picture'           => 'permit_empty|string',
+            'picture'           => 'permit_empty|string'
         ];
 
         // Validate input
@@ -93,18 +91,16 @@ class UserController extends ResourceController
         // Create a new UserEntity instance and set the properties
         $user = new UserEntity();
         $data = array_merge([
-            'id' => $user->generateUniqueId()
+            'id' => $user->generateUniqueId(),
+            'type' => 'sub_user',
+            'creator' => auth()->user()->id,
+            'owner' => auth()->user()->owner,
         ], $this->validator->getValidated());
 
         $user->fill($data);
 
-        // Set the password using the entity's method to trigger automatic hashing
-        $user->setPassword($this->request->getVar('password'));
-
         // Save user to database using the UserModel
-        $userModel = new UserModel();
-
-        if ($userModel->save($user)) {
+        if ($this->model->save($user)) {
             return $this->respondCreated([
                 'status'  => true,
                 'message' => 'User created successfully',
@@ -127,16 +123,23 @@ class UserController extends ResourceController
      */
     public function update($id = null)
     {
-        $response = auth()->can('update', 'users', ['id' => $id]);
+        $user = $this->model->find($id);
+        if (!$user) {
+            return $this->respond([
+                'status'  => false,
+                'message' => "User doesn't exist.",
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $response = auth()->can('update', 'users', ['owner'], [$user]);
         if ($response->denied())
             return $response->responsed();
 
         $rules = [
             'email'             => 'permit_empty|valid_email',
             'phone'             => 'permit_empty|numeric|min_length[10]|max_length[15]',
-            'username'          => 'permit_empty|min_length[3]|max_length[20]',
+            'username'          => 'if_exist|min_length[3]|max_length[20]|is_unique[users.username,username,username]',
             'name'              => 'permit_empty|min_length[3]|max_length[50]',
-            'password'          => 'permit_empty|min_length[6]',
             'social_id'         => 'permit_empty|string',
             'social_provider'   => 'permit_empty|string',
             'given_name'        => 'permit_empty|string',
@@ -155,10 +158,7 @@ class UserController extends ResourceController
                 'error'   => $this->validator->getErrors()
             ], Response::HTTP_BAD_REQUEST);
         }
-
-        $userModel  = new UserModel();
-        $user       =  $userModel->find($id);
-        $data       = $this->validator->getValidated();
+        $data = $this->validator->getValidated();
 
         if (count($data) === 0) {
             return $this->respond([
@@ -169,10 +169,7 @@ class UserController extends ResourceController
         }
         $user->fill($this->validator->getValidated());
 
-        // Set the password using the entity's method to trigger automatic hashing
-        $user->setPassword($this->request->getVar('password'));
-
-        if ($userModel->save($user)) {
+        if ($this->model->save($user)) {
             return $this->respondUpdated([
                 'status'  => true,
                 'message' => 'User updated successfully',
@@ -195,12 +192,18 @@ class UserController extends ResourceController
      */
     public function delete($id = null)
     {
-        $response = auth()->can('delete', 'users', ['id' => $id]);
+        $user = $this->model->find($id);
+        if (!$user) {
+            return $this->respond([
+                'status'  => false,
+                'message' => "User doesn't exist.",
+            ], Response::HTTP_NOT_FOUND);
+        }
+        $response = auth()->can('delete', 'users', ['owner'], [$user]);
         if ($response->denied())
             return $response->responsed();
 
-        $userModel = new UserModel();
-        if ($userModel->delete($id)) {
+        if ($this->model->delete($id)) {
             return $this->respondDeleted([
                 'status'  => true,
                 'message' => 'User delete successfully',

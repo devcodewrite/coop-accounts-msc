@@ -7,12 +7,15 @@ use CodeIgniter\Model;
 class UserRoleModel extends Model
 {
     protected $table            = 'users_roles';
-    protected $primaryKey       = 'user_id';
+    protected $primaryKey       = 'role_id';
     protected $useAutoIncrement = false;
     protected $returnType       = 'object';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = [];
+    protected $allowedFields    = [
+        'user_id',
+        'role_id'
+    ];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;

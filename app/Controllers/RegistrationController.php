@@ -27,7 +27,7 @@ class RegistrationController extends ResourceController
 
         // Validate input
         if (!$this->validate($rules)) {
-            $this->respond([
+            return $this->respond([
                 'status' => false,
                 'message' => 'Validation failed',
                 'errors' => $this->validator->getErrors(),
@@ -42,6 +42,7 @@ class RegistrationController extends ResourceController
             'phone'    => $this->request->getVar('phone'),
             'username' => $this->request->getVar('username'),
             'name'     => $this->request->getVar('name'),
+            'type'     => 'root_user',
         ]);
 
         // Set the password using the entity's method to trigger automatic hashing
@@ -51,6 +52,10 @@ class RegistrationController extends ResourceController
         $userModel = new UserModel();
 
         if ($userModel->save($user)) {
+            // update owner
+            $user->owner = $user->id;
+            $userModel->save($user);
+
             return $this->respondCreated([
                 'status'  => 'success',
                 'message' => 'User registered successfully',

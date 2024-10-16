@@ -7,12 +7,18 @@ use CodeIgniter\Model;
 class PermissionModel extends Model
 {
     protected $table            = 'permissions';
-    protected $primaryKey       = 'id';
-    protected $useAutoIncrement = true;
+    protected $primaryKey       = 'role_id';
+    protected $useAutoIncrement = false;
     protected $returnType       = 'object';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = [];
+    protected $allowedFields    = [
+        'resource_id',
+        'role_id',
+        'actions',
+        'scopes',
+        'filters'
+    ];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;

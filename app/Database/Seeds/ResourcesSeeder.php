@@ -21,7 +21,8 @@ class ResourcesSeeder extends Seeder
             ['id' => 'regions', 'name' => 'Regions'],
             ['id' => 'offices', 'name' => 'Offices'],
             ['id' => 'organizations', 'name' => 'Organizations'],
-            ['id' => 'passbooks', 'name' => 'Passbooks']
+            ['id' => 'passbooks', 'name' => 'Passbooks'],
+            ['id' => 'passwords', 'name' => 'Passbooks']
         ];
         //
         $this->db->table('resources')->insertBatch($data);
