@@ -68,6 +68,7 @@ class UserController extends ResourceController
             'email'    => 'required|valid_email|is_unique[users.email]',
             'phone'    => 'permit_empty|numeric|min_length[10]|max_length[15]|is_unique[users.phone]',
             'username' => 'required|min_length[3]|max_length[20]|is_unique[users.username]',
+            'password' => 'required|min_length[6]',
             'name'     => 'required|min_length[3]|max_length[50]',
             'social_id'         => 'permit_empty|string',
             'social_provider'   => 'permit_empty|string',
