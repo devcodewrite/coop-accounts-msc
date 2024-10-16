@@ -94,7 +94,7 @@ class UserModel extends Model
         $roleModel->save(['name' => 'ManageMyProfileRole', 'owner' => $owner, 'editable' => false]);
         $role3 = $roleModel->getInsertID();
 
-        $fiter = json_encode(['owner' => $owner]);
+        $fiter = json_encode(['owner' => [$owner]]);
         $scope = json_encode([$userId]);
 
         $permModel->insertBatch([
@@ -103,7 +103,7 @@ class UserModel extends Model
             ['resource_id' => 'roles', 'role_id' => $role1, 'actions' => '["create","view","update","delete"]', 'scopes' => null, 'filters' => $fiter],
             ['resource_id' => 'users', 'role_id' => $role1, 'actions' => '["create","view","update","delete"]', 'scopes' => null, 'filters' => $fiter],
             ['resource_id' => 'passwords', 'role_id' => $role1, 'actions' => '["update"]', 'scopes' => $scope, 'filters' => $fiter],
-            
+
             //cooperatives role
             ['resource_id' => 'organizations', 'role_id' => $role1, 'actions' => '["create","view","update","delete"]', 'scopes' => null, 'filters' => $fiter],
             ['resource_id' => 'offices', 'role_id' => $role1, 'actions' => '["create","view","update","delete"]', 'scopes' => null, 'filters' => $fiter],
