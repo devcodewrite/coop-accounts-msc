@@ -53,6 +53,7 @@ class UserController extends ResourceController
     public function show($id = null)
     {
         $params = $this->request->getVar(['columns']);
+        $this->model->where('id',$id);
         $response = new ApiResponse($this->model, $params, $this->allowedColumns);
         return $response->getSingleResponse(true, ['owner']);
     }
@@ -160,15 +161,7 @@ class UserController extends ResourceController
             ], Response::HTTP_BAD_REQUEST);
         }
         $data = $this->validator->getValidated();
-
-        if (count($data) === 0) {
-            return $this->respond([
-                'status'  => false,
-                'message' => 'Failed validating data',
-                'error'   => $this->validator->getErrors()
-            ], Response::HTTP_BAD_REQUEST);
-        }
-        $user->fill($this->validator->getValidated());
+        $user->fill($data);
 
         if ($this->model->save($user)) {
             return $this->respondUpdated([

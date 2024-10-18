@@ -10,6 +10,8 @@ use Codewrite\CoopAuth\ApiResponse;
 
 class RoleController extends ResourceController
 {
+    protected $modelName = RoleModel::class;
+    protected $allowedColumns = []; // all columns
    /**
      * Return an array of resource objects, themselves in array format.
      *
@@ -17,19 +19,10 @@ class RoleController extends ResourceController
      */
     public function index()
     {
-        $response = auth()->can('view', 'roles');
-        if ($response->denied())
-            return $response->responsed();
+        $params = $this->request->getVar(['columns','filters', 'sort', 'page', 'pageSize']);
+        $response = new ApiResponse($this->model, $params, $this->allowedColumns);
 
-        $roleModel = new RoleModel();
-        auth()->applyConditionsToModel($roleModel, 'roles');
-
-        $params = $this->request->getVar(['columns', 'sort', 'page', 'pageSize']);
-        $allowedColumns = [];
-
-        $response = new ApiResponse($roleModel, $params, $allowedColumns);
-
-        return $response->getCollectionResponse();
+        return $response->getCollectionResponse(true, ['owner']);
     }
 
     /**
@@ -41,18 +34,11 @@ class RoleController extends ResourceController
      */
     public function show($id = null)
     {
-        $response = auth()->can('view', 'roles', ['id' => $id]);
-        if ($response->denied())
-            return $response->responsed();
-
-        $roleModel = new RoleModel();
-        $roleModel->where('id', $id);
-
+        $this->model->where('id', $id);
         $params = $this->request->getVar(['columns']);
-        $allowedColumns = []; // all columns
-        $response = new ApiResponse($roleModel, $params, $allowedColumns);
+        $response = new ApiResponse($this->model, $params, $this->allowedColumns);
 
-        return $response->getSingleResponse();
+        return $response->getSingleResponse(true,['owner']);
     }
 
     /**
@@ -62,11 +48,6 @@ class RoleController extends ResourceController
      */
     public function create()
     {
-        $response = auth()->can('create', 'roles');
-
-        if ($response->denied())
-            return $response->responsed();
-
         $rules = [
             'name'  => 'required|max_length[100]',
             'owner' => 'permit_empty|is_not_unique[users.id]',
