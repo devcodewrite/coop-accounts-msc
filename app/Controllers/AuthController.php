@@ -124,9 +124,9 @@ class AuthController extends ResourceController
                 'refresh_token' => $refreshToken
             ]);
         } catch (ExpiredException $e) {
-            return new GuardReponse(false, CoopResponse::TOKEN_EXPIRED);
+            return (new GuardReponse(false, CoopResponse::TOKEN_EXPIRED))->responsed();
         } catch (Exception $e) {
-            return new GuardReponse(false, CoopResponse::INVALID_TOKEN);
+            return (new GuardReponse(false, CoopResponse::INVALID_TOKEN))->responsed();
         }
     }
 
